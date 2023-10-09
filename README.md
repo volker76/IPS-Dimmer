@@ -1,2 +1,6 @@
-# IPS-Dimmer
-IP Symcon / Übersetzung eines Schaltbefehls in ein langsames Dimmen einer Lampe
+# IPSDimmer
+
+Folgende Module beinhaltet das IPSDimmer Repository:
+
+- __IPSDimmer__ ([Dokumentation](IPSDimmer))  
+	Kurze Beschreibung des Moduls.
