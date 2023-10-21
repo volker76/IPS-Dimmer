@@ -7,6 +7,9 @@ declare(strict_types=1);
 		{
 			//Never delete this line!
 			parent::Create();
+			
+			##### Target
+			$this->RegisterPropertyInteger('TargetVariable', 0);
 		}
 
 		public function Destroy()
