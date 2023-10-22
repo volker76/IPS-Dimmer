@@ -33,8 +33,8 @@ declare(strict_types=1);
 			
 			$this->RegisterPropertyInteger('EndIntensity', 255);
 			
-			$script = self::MODULE_PREFIX .'_' . 'Timer(' . $this->InstanceID . ');
-		    $this->RegisterTimer("DimTimer",0,$script);
+			$script = self::MODULE_PREFIX .'_' . 'Timer(' . $this->InstanceID . ');';
+		    $this->RegisterTimer('DimTimer',0,$script);
 
 
 		}
@@ -72,14 +72,14 @@ declare(strict_types=1);
                 }
             }
             
-            $id = @$this->GetIDForIdent("DIMStatus");
+            $id = @$this->GetIDForIdent('DIMStatus');
             if ($id != 0 && @IPS_ObjectExists($id)) {
                 $this->RegisterReference($id);
                 $this->RegisterMessage($id, VM_UPDATE);
             }
             
             //Reset buffer
-            $this->SetBuffer("LastMessage", json_encode([]));
+            $this->SetBuffer('LastMessage', json_encode([]));
 
 		}
 		
@@ -87,7 +87,7 @@ declare(strict_types=1);
         {
             switch ($Ident) {
     
-                case "DIMStatus":
+                case 'DIMStatus':
                     $this->SetValue($Ident, $Value);
                     break;
     
