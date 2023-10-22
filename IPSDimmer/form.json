@@ -1,9 +1,67 @@
 {
-    "elements": [],
-    "actions": [
-		{
-		  "type": "TestCenter"
-		}
-	],
-    "status": []
+  "elements": [
+    {
+		"type"    : "ExpansionPanel",
+		"name"    : "Panel5",
+		"caption" : "Dimmer Einstellungen",
+		"expanded": "true",
+		"items"   : [
+			{
+				"type"    : "NumberSpinner",
+				"name"    : "EndIntensity",
+				"caption" : "Zielhelligkeit",
+				"width"   : "300px"
+			},
+			{
+				"type"    : "NumberSpinner",
+				"name"    : "EndColor",
+				"caption" : "Zielfarbe",
+				"width"   : "300px"
+			},
+			{
+				"type"    : "NumberSpinner",
+				"name"    : "DimSpeed",
+				"caption" : "Geschwindigkeit",
+				"suffix"  : "Sekunden",
+				"default" : "10",
+				"minimum" : "1",
+				"width"   : "300px"
+			}
+		]
+	} ,
+	{
+		"type"    : "ExpansionPanel",
+		"name"    : "Panel6",
+		"caption" : "Zielvariable",
+		"expanded": "true",
+		"items"   : [
+			{
+				"type"    : "SelectVariable",
+				"name"    : "TargetVariable",
+				"caption" : "Status",
+				"width"   : "600px",
+				"validVariableTypes" :  [0]
+			},
+			{
+				"type"    : "SelectVariable",
+				"name"    : "TargetBrightness",
+				"caption" : "Helligkeit",
+				"width"   : "600px",
+				"validVariableTypes" :  [1,2]
+			},
+			{
+				"type"    : "SelectVariable",
+				"name"    : "TargetColor",
+				"caption" : "Farbe",
+				"width"   : "600px",
+				"validVariableTypes" :  [1,2]
+			}
+		]
+	}
+  ],
+  "actions": [
+    {
+      "type": "TestCenter"
+    }
+  ]
 }
