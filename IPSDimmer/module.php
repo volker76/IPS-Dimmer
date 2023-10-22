@@ -3,6 +3,8 @@
 declare(strict_types=1);
 	class IPSDimmer extends IPSModule
 	{
+	    private const MODULE_PREFIX = 'DIM';
+	    
 		public function Create()
 		{
 			//Never delete this line!
@@ -31,7 +33,8 @@ declare(strict_types=1);
 			
 			$this->RegisterPropertyInteger('EndIntensity', 255);
 			
-		    $this->RegisterTimer("DimTimer",0,"DIM_SyncStation(\$_IPS['TARGET']);");
+			$script = self::MODULE_PREFIX .'_' . 'Timer(' . $this->InstanceID . ');
+		    $this->RegisterTimer("DimTimer",0,$script);
 
 
 		}
@@ -69,14 +72,14 @@ declare(strict_types=1);
                 }
             }
             
-            $id = @$this->GetIDForIdent('DIMStatus');
+            $id = @$this->GetIDForIdent("DIMStatus");
             if ($id != 0 && @IPS_ObjectExists($id)) {
                 $this->RegisterReference($id);
                 $this->RegisterMessage($id, VM_UPDATE);
             }
             
             //Reset buffer
-            $this->SetBuffer('LastMessage', json_encode([]));
+            $this->SetBuffer("LastMessage", json_encode([]));
 
 		}
 		
@@ -84,7 +87,7 @@ declare(strict_types=1);
         {
             switch ($Ident) {
     
-                case 'DIMStatus':
+                case "DIMStatus":
                     $this->SetValue($Ident, $Value);
                     break;
     
@@ -135,10 +138,86 @@ declare(strict_types=1);
     
             }
         }
-        public function RunDimmer($On)
+        private function RunDimmer($targetState)
         {
-            $this->SendDebug('Dimmer', 'Dimme nach ' . $On, 0);
             
+            $timeslice = 300; //300mm Timer
+            
+            $targetVariable = $this->ReadPropertyInteger('TargetVariable');
+            if ($targetVariable != 0 && @IPS_ObjectExists($targetVariable)) 
+            {
+                $current = GetValueBoolean($targetVariable);
+                
+                if ($current != $targetState)
+                {
+                    //es findet eine Änderung des Zustands statt
+                    $this->SendDebug("Dimmer", "Dimme nach " . $targetState ? "an":"aus", 0);
+
+
+                    if ($targetState == TRUE)
+                    {
+                        $targetBrightness = $this->ReadPropertyInteger('TargetBrightness');
+                        if ($targetBrightness != 0 && @IPS_ObjectExists($targetBrightness)) 
+                        {
+                            @RequestAction($targetBrightness, 0);
+                        }
+                        $start = 0;
+                        $targetColor = $this->ReadPropertyInteger('TargetColor');
+                        if ($targetColor != 0 && @IPS_ObjectExists($targetColor)) 
+                        {
+                            @RequestAction($targetColor, 555); //ganz warm
+                        }
+                        
+                        @RequestAction($targetVariable, $targetState);
+                        
+                        $end = $this->ReadPropertyInteger('EndIntensity');
+                        $duration = $this->ReadPropertyInteger('DimSpeed') * 1000.0;
+                        
+                        $steps = $duration / $timeslice;
+                        $step = ($end-$start)/$steps;
+                        
+                        
+				        $this->SendDebug('Dimmer', 'Dimme ' . $start . ' ' . $step . ' ->' . $end, 0);
+				        
+				        $this->SetTimerInterval("DimTimer", $timeslice);
+                    }
+                    else
+                    {
+                        @RequestAction($targetVariable, $targetState);
+                        $this->SetTimerInterval("DimTimer", 0);
+                    }
+                    
+                    
+                }
+            }
             
         }
+        public function Timer():void
+        {
+            $current = $this->ReadAttributeFloat('DimmingCurrent');
+            $step = $this->ReadAttributeFloat('DimmingStep');
+            $end = $this->ReadAttributeFloat('DimmingEnd');
+            
+            $current = $current + $step;
+            $this->SendDebug('Dimmer', 'Dimme ' . $current . ' ->' . $finish, 0);
+            
+            if (($step > 0) && ($current > $end))
+            {
+                $this->SetTimerInterval("DimTimer", 0); //timer off
+                $current = $end;
+            }
+            
+            if (($step < 0) && ($current < $end))
+            {
+                $this->SetTimerInterval("DimTimer", 0); //timer off
+                $current = $end;
+            }
+            
+            $targetBrightness = $this->ReadPropertyInteger('TargetBrightness');
+            if ($targetBrightness != 0 && @IPS_ObjectExists($targetBrightness)) 
+            {
+                @RequestAction($targetBrightness, $current);
+            }
+        }
+        
 	}
